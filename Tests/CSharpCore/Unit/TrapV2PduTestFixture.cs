@@ -9,7 +9,11 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new TrapV2Pdu(0, new Span<byte>(new byte[] { 0 }), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new TrapV2Pdu(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+#endif
             Assert.Throws<ArgumentNullException>(() => new TrapV2Pdu(0, null, 0, null));
             Assert.Throws<ArgumentNullException>(() => new TrapV2Pdu(0, new ObjectIdentifier("1.3.6"), 0, null));
             var pdu = new TrapV2Pdu(0, new ObjectIdentifier("1.3"), 0, new List<Variable>());

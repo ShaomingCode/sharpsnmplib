@@ -7,6 +7,6 @@ sed -i -e 's/netstandard1.3;net452/netstandard1.3/' SharpSnmpLib/SharpSnmpLib.cs
 dotnet build SharpSnmpLib.NetStandard.macOS.sln
 cd Tests
 cd CSharpCore
-dotnet test
+dotnet xunit
 cd ..
 cd ..

@@ -19,39 +19,45 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestContructor()
         {
-            var counter64 = new Counter64(new byte[] {0x00, 0xC9, 0xAC, 0xC1, 0x87, 0x4B, 0xB1, 0xE1, 0xC9});
+            var counter64 = new Counter64(new byte[] { 0x00, 0xC9, 0xAC, 0xC1, 0x87, 0x4B, 0xB1, 0xE1, 0xC9 });
             Assert.Equal(14532202884452442569, counter64.ToUInt64());
             Assert.Equal(14532202884452442569.GetHashCode(), counter64.GetHashCode());
             Assert.Equal("14532202884452442569", counter64.ToString());
 
-            Assert.Throws<ArgumentNullException>(() => new Counter64(null, new MemoryStream()));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new Counter64(0, new Span<byte>(new byte[] { 0 }), null));
+            Assert.Throws<ArgumentException>(() => new Counter64(-1, new Span<byte>(new[] { (byte)255 }), new Span<byte>()));
+            Assert.Throws<ArgumentException>(() => new Counter64(10, new Span<byte>(new byte[] { 10 }), new Span<byte>()));
+#else
             Assert.Throws<ArgumentNullException>(() => new Counter64(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+            Assert.Throws<ArgumentNullException>(() => new Counter64(null, new MemoryStream()));
             Assert.Throws<ArgumentException>(() => new Counter64(new Tuple<int, byte[]>(-1, new[] { (byte)255 }), new MemoryStream()));
-            Assert.Throws<ArgumentException>(() => new Counter64(new Tuple<int, byte[]>(10, new byte[]{10}), new MemoryStream()));
+            Assert.Throws<ArgumentException>(() => new Counter64(new Tuple<int, byte[]>(10, new byte[] { 10 }), new MemoryStream()));
+#endif
             Assert.Throws<ArgumentException>(
-                () => new Counter64(new byte[] {0x05, 0xC9, 0xAC, 0xC1, 0x87, 0x4B, 0xB1, 0xE1, 0xC9}));
+                () => new Counter64(new byte[] { 0x05, 0xC9, 0xAC, 0xC1, 0x87, 0x4B, 0xB1, 0xE1, 0xC9 }));
 
             var small = new Counter64(new byte[] { 0x00, 0xC9, 0xAC, 0xC1, 0x87 });
             Assert.Equal(3383542151, small.ToUInt64());
 
             Assert.Throws<ArgumentNullException>(() => new Counter64(0).AppendBytesTo(null));
         }
-        
+
         [Fact]
         public void TestToBytes()
         {
-            Assert.Equal(new byte[] {0x46, 0x09, 0x00, 0xC9, 0xAC, 0xC1, 0x87, 0x4B, 0xB1, 0xE1, 0xC9}, new Counter64(14532202884452442569).ToBytes());
+            Assert.Equal(new byte[] { 0x46, 0x09, 0x00, 0xC9, 0xAC, 0xC1, 0x87, 0x4B, 0xB1, 0xE1, 0xC9 }, new Counter64(14532202884452442569).ToBytes());
         }
-        
+
         [Fact]
         public void TestEqual()
         {
             var left = new Counter64(673737665);
             var right = new Counter64(673737665);
             Assert.Equal(left, right);
-// ReSharper disable EqualExpressionComparison
+            // ReSharper disable EqualExpressionComparison
             Assert.True(left == left);
-// ReSharper restore EqualExpressionComparison
+            // ReSharper restore EqualExpressionComparison
             Assert.True(left != null);
             Assert.True(null != right);
             Assert.True(left.Equals(right));

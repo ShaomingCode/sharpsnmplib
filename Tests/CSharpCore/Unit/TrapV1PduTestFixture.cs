@@ -22,7 +22,11 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new TrapV1Pdu(0, new Span<byte>(new byte[] { 0 }), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new TrapV1Pdu(new Tuple<int, byte[]>(0, new byte[] { 0 }),null));
+#endif
             Assert.Throws<ArgumentNullException>(() => new TrapV1Pdu((ObjectIdentifier)null, null, null, null, null, null));
             Assert.Throws<ArgumentNullException>(() => new TrapV1Pdu(new ObjectIdentifier(new uint[] {1, 3, 6, 1, 4, 1, 2162, 1000, 2}), null, null, null, null, null));
             Assert.Throws<ArgumentNullException>(() => new TrapV1Pdu(new ObjectIdentifier(new uint[] {1, 3, 6, 1, 4, 1, 2162, 1000, 2}),
@@ -89,7 +93,7 @@ namespace Lextm.SharpSnmpLib.Unit
         public void TestToTrapMessageChinese()
         {
             Variable v = new Variable(new ObjectIdentifier(new uint[] {1,3,6,1,4,1,2162,1001,21,0}), 
-                                      new OctetString("中国", Encoding.Unicode));
+                                      new OctetString("脰脨鹿煤", Encoding.Unicode));
             List<Variable> vList = new List<Variable> {v};
 
             TrapV1Pdu pdu = new TrapV1Pdu(new ObjectIdentifier(new uint[] {1, 3, 6, 1, 4, 1, 2162, 1000, 2}),
@@ -107,7 +111,7 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Equal(new uint[] {1, 3, 6, 1, 4, 1, 2162, 1000, 2}, message.Enterprise.ToNumerical());
             Assert.Equal(1, message.Variables().Count);
             Assert.Equal(new uint[] {1,3,6,1,4,1,2162,1001,21,0}, message.Variables()[0].Id.ToNumerical());
-            Assert.Equal("中国", ((OctetString)message.Variables()[0].Data).ToString(Encoding.Unicode));
+            Assert.Equal("脰脨鹿煤", ((OctetString)message.Variables()[0].Data).ToString(Encoding.Unicode));
         }
     }
 }

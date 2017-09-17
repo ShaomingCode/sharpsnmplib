@@ -41,7 +41,7 @@ namespace Lextm.SharpSnmpLib
         private readonly Sequence _varbindSection;
         private readonly byte[] _length;
         private byte[] _raw;
-      
+
         /// <summary>
         /// Creates a <see cref="SetRequestPdu"/> instance with all contents.
         /// </summary>
@@ -61,6 +61,23 @@ namespace Lextm.SharpSnmpLib
             _varbindSection = Variable.Transform(Variables);
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SetRequestPdu"/> class.
+        /// </summary>
+        /// <param name="length">The length data.</param>
+        /// <param name="stream">The stream.</param>
+        public SetRequestPdu(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            var next = 0;
+            RequestId = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            ErrorStatus = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            ErrorIndex = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            _varbindSection = (Sequence)DataFactory.CreateSnmpData(stream, next, out next);
+            Variables = Variable.Transform(_varbindSection);
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="SetRequestPdu"/> class.
         /// </summary>
@@ -85,7 +102,8 @@ namespace Lextm.SharpSnmpLib
             Variables = Variable.Transform(_varbindSection);
             _length = length.Item2;
         }
-        
+#endif
+
         /// <summary>
         /// Returns a <see cref="string"/> that represents this <see cref="SetRequestPdu"/>.
         /// </summary>
@@ -143,7 +161,7 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(stream));
             }
-            
+
             if (_raw == null)
             {
                 _raw = ByteTool.ParseItems(RequestId, ErrorStatus, ErrorIndex, _varbindSection);

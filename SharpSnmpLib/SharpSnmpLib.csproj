@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>SharpSnmpLib</AssemblyName>
     <RootNamespace>Lextm.SharpSnmpLib</RootNamespace>
-    <TargetFrameworks>netstandard1.3;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;net452;netcoreapp2.0</TargetFrameworks>
     <DocumentationFile Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">..\bin\SharpSnmpLib.xml</DocumentationFile>
     <PackageId>Lextm.SharpSnmpLib</PackageId>
     <Title>#SNMP Library</Title>
@@ -32,6 +32,14 @@
     <PackageReference Include="System.Net.NetworkInformation" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.0'">
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageReference Include="System.Memory" Version="4.4.0-*" />
+    <PackageReference Include="System.Net.NetworkInformation" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net452'">
     <Reference Include="System.Configuration" />

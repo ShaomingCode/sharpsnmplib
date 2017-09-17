@@ -161,6 +161,24 @@ namespace Lextm.SharpSnmpLib
                     ('A' <= character && character <= 'F'));
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IP"/> class.
+        /// </summary>
+        /// <param name="length">The length.</param>
+        /// <param name="stream">The stream.</param>
+        public IP(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            if (Item1 != IPv4Length)
+            {
+                throw new ArgumentException("Bytes must contain 4 or 16 elements.", nameof(Item1));
+            }
+
+            var raw = stream.ToArray();
+            _ip = raw;
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="IP"/> class.
         /// </summary>
@@ -188,6 +206,7 @@ namespace Lextm.SharpSnmpLib
             _ip = raw;
             _length = length.Item2;
         }
+#endif
 
         /// <summary>
         /// Gets the raw bytes.

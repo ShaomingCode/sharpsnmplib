@@ -46,6 +46,17 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Equal(new byte[] { 0x10, 0x12 }, b);
         }
 
+#if NETCOREAPP2_0
+        [Fact]
+        public void TestReadShortLength()
+        {
+            var m = new Span<byte>(new[] { (byte)0x66 });
+            var Item1 = 0;
+            var Item2 = m.ReadPayloadLength(out Item1);
+            Assert.Equal(102, Item1);
+            Assert.Equal(new byte[] { 0x66 }, Item2);
+        }
+#else
         [Fact]
         public void TestReadShortLength()
         {
@@ -55,9 +66,10 @@ namespace Lextm.SharpSnmpLib.Unit
             m.Position = 0;
             var result = m.ReadPayloadLength();
             Assert.Equal(102, result.Item1);
-            Assert.Equal(new byte[] {0x66}, result.Item2);
+            Assert.Equal(new byte[] { 0x66 }, result.Item2);
         }
-        
+#endif
+
         [Fact]
         public void TestWriteShortLength()
         {
@@ -67,23 +79,34 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Equal(1, array.Length);
             Assert.Equal(expect, array[0]);
         }
-        
+
+#if NETCOREAPP2_0
         [Fact]
         public void TestReadLongLength()
         {
-            byte[] expected = new byte[] {0x83, 0x73, 0x59, 0xB5};
+            byte[] expected = new byte[] { 0x83, 0x73, 0x59, 0xB5 };
+            var m = new Span<byte>(expected);
+            var Item1 = 0;
+            m.ReadPayloadLength(out Item1);
+            Assert.Equal(7559605, Item1);
+        }
+#else
+        [Fact]
+        public void TestReadLongLength()
+        {
+            byte[] expected = new byte[] { 0x83, 0x73, 0x59, 0xB5 };
             MemoryStream m = new MemoryStream();
             m.Write(expected, 0, 4);
             m.Flush();
             m.Position = 0;
             Assert.Equal(7559605, m.ReadPayloadLength().Item1);
         }
-        
+#endif
         [Fact]
         public void TestWriteLongLength()
         {
             const int length = 7559605;
-            byte[] expected = new byte[] {0x83, 0x73, 0x59, 0xB5};
+            byte[] expected = new byte[] { 0x83, 0x73, 0x59, 0xB5 };
             MemoryStream m = new MemoryStream();
             var array = length.WritePayloadLength();
             Assert.Equal(expected, array);

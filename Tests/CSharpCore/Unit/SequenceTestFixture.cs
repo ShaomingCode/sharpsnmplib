@@ -21,7 +21,11 @@ namespace Lextm.SharpSnmpLib.Unit
         {
             Assert.Throws<ArgumentNullException>(() => new Sequence((byte[])null, null));
             Assert.Throws<ArgumentNullException>(() => new Sequence((IEnumerable<ISnmpData>) null));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new Sequence(0, new Span<byte>(new byte[] { 0 }), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new Sequence(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+#endif
         }
 
         [Fact]

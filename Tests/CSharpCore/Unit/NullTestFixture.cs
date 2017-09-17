@@ -18,8 +18,12 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestConstructors()
         {
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new Null(0, new Span<byte>(new byte[0]), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new Null(null, null));
             Assert.Throws<ArgumentNullException>(() => new Null(new Tuple<int, byte[]>(0, new byte[0]), null));
+#endif
         }
         
         [Fact]
@@ -54,4 +58,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591, 0618,1718
+#pragma warning restore 1591, 0618, 1718

@@ -88,6 +88,42 @@ namespace Lextm.SharpSnmpLib
             _varbindSection = Variable.Transform(Variables);
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InformRequestPdu"/> class.
+        /// </summary>
+        /// <param name="length">The length data.</param>
+        /// <param name="stream">The stream.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "temp1")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "temp2")]
+        public InformRequestPdu(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            var next = 0;
+            RequestId = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            var status = DataFactory.CreateSnmpData(stream, next, out next);
+            var index = DataFactory.CreateSnmpData(stream, next, out next);
+            _varbindSection = (Sequence)DataFactory.CreateSnmpData(stream, next, out next);
+            Variables = Variable.Transform(_varbindSection);
+            if (Variables.Count >= 2)
+            {
+                _time = (TimeTicks)Variables[0].Data;
+                Variables.RemoveAt(0);
+                Enterprise = (ObjectIdentifier)Variables[0].Data;
+                Variables.RemoveAt(0);
+            }
+            else if (Variables.Count == 0)
+            {
+                _time = new TimeTicks(0);
+                Enterprise = null;
+            }
+            else
+            {
+                throw new ArgumentException("Malformed inform message.", nameof(stream));
+            }
+
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="InformRequestPdu"/> class.
         /// </summary>
@@ -133,6 +169,8 @@ namespace Lextm.SharpSnmpLib
 
             _length = length.Item2;
         }
+
+#endif
 
         /// <summary>
         /// Gets the request ID.

@@ -26,7 +26,11 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new OctetString(0, new Span<byte>(new byte[] { 0 }), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new OctetString(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+#endif
             Assert.Throws<ArgumentNullException>(() => new OctetString((byte[])null));
             Assert.Throws<ArgumentNullException>(() => OctetString.Empty.ToString(null));
             Assert.Throws<ArgumentNullException>(() => OctetString.Empty.AppendBytesTo(null));
@@ -93,4 +97,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618,1718
+#pragma warning restore 1591, 0618, 1718

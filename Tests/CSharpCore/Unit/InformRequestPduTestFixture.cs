@@ -19,11 +19,12 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
-            Assert.Throws<ArgumentNullException>(() => new InformRequestPdu(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+            Assert.Throws<ArgumentNullException>(() => new InformRequestPdu(0, new Span<byte>(new byte[] { 0 }), null));
             Assert.Throws<ArgumentNullException>(() => new InformRequestPdu(0, null, 0, null));
             Assert.Throws<ArgumentNullException>(() => new InformRequestPdu(0, new ObjectIdentifier("1.3.6.1"), 0, null));
+#if !NETCOREAPP2_0
             Assert.Throws<ArgumentNullException>(() => new InformRequestPdu(null, new MemoryStream()));
-                        
+#endif
             var pdu = new InformRequestPdu(0, new ObjectIdentifier("1.3.6.1"), 0, new List<Variable>());
             Assert.Throws<ArgumentNullException>(() => pdu.AppendBytesTo(null));
             Assert.Equal("INFORM request PDU: seq: 0; enterprise: 1.3.6.1; time stamp: 00:00:00; variable count: 0", pdu.ToString());

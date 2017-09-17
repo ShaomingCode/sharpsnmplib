@@ -18,10 +18,14 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
-            Assert.Throws<ArgumentNullException>(() => new TimeTicks(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));   
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new TimeTicks(0, new Span<byte>(new byte[] { 0 }), null));
+#else
+            Assert.Throws<ArgumentNullException>(() => new TimeTicks(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+#endif
             Assert.Throws<ArgumentNullException>(() => new TimeTicks(0).AppendBytesTo(null));
         }
-        
+
         [Fact]
         public void TestConstructor3()
         {
@@ -37,7 +41,7 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Equal(15U, time.ToUInt32());
             Assert.Equal("00:00:00.1500000", time.ToString());
         }
-        
+
         [Fact]
         public void TestConstructor2()
         {
@@ -52,10 +56,10 @@ namespace Lextm.SharpSnmpLib.Unit
             ISnmpData data = DataFactory.CreateSnmpData(time.ToBytes());
             Assert.Equal(data.TypeCode, SnmpType.TimeTicks);
             Assert.Equal(16352U, ((TimeTicks)data).ToUInt32());
-            
-            Assert.Equal(new byte[] {0x43, 0x05, 0x00, 0x93, 0xA3, 0x41, 0x4B}, new TimeTicks(2476949835).ToBytes());
+
+            Assert.Equal(new byte[] { 0x43, 0x05, 0x00, 0x93, 0xA3, 0x41, 0x4B }, new TimeTicks(2476949835).ToBytes());
         }
-        
+
         [Fact]
         public void TestToTimeSpan()
         {
@@ -66,24 +70,24 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Equal(34, result.Seconds);
             Assert.Equal(470, result.Milliseconds);
         }
-        
+
         [Fact]
         public void TestConstructor4()
         {
-        	var result = new TimeTicks(171447);
-        	var ticks = new TimeTicks(new TimeSpan(0, 0, 28, 34, 470));
-        	Assert.Equal(result, ticks);
+            var result = new TimeTicks(171447);
+            var ticks = new TimeTicks(new TimeSpan(0, 0, 28, 34, 470));
+            Assert.Equal(result, ticks);
         }
-        
+
         [Fact]
         public void TestEqual()
         {
             var left = new TimeTicks(800);
             var right = new TimeTicks(800);
             Assert.Equal(left, right);
-// ReSharper disable EqualExpressionComparison
+            // ReSharper disable EqualExpressionComparison
             Assert.True(left == left);
-// ReSharper restore EqualExpressionComparison
+            // ReSharper restore EqualExpressionComparison
             Assert.True(left != null);
             Assert.True(left.Equals(right));
 
@@ -91,4 +95,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618,1718
+#pragma warning restore 1591, 0618, 1718

@@ -35,8 +35,10 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.False(left.Equals(1));
 
             Assert.Throws<ArgumentNullException>(() => left.AppendBytesTo(null));
-            Assert.Throws<ArgumentNullException>(() => new Gauge32(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+            Assert.Throws<ArgumentNullException>(() => new Gauge32(0, new Span<byte>(new byte[] { 0 }), null));
+#if !NETCOREAPP2_0
             Assert.Throws<ArgumentNullException>(() => new Gauge32(null, new MemoryStream()));
+#endif
         }
         
         [Fact]
@@ -100,4 +102,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618,1718
+#pragma warning restore 1591, 0618, 1718

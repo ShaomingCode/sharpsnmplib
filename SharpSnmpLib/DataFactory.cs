@@ -51,7 +51,112 @@ namespace Lextm.SharpSnmpLib
 
             return CreateSnmpData(buffer, 0, buffer.Length);
         }
-        
+
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Creates an <see cref="ISnmpData"/> instance from stream.
+        /// </summary>
+        /// <param name="stream">Stream.</param>
+        /// <param name="type">Type code.</param>
+        /// <returns></returns>
+        public static ISnmpData CreateSnmpData(Span<byte> span, int start, out int next)
+        {
+            var type = span[start];
+            var offset = start + 1;
+            var container = span.Slice(offset);
+            var Item1 = 0;
+            var Item2 = container.ReadPayloadLength(out Item1);
+            var stream = container.Slice(Item2.Length, Item1);
+            next = 1 + start + Item2.Length + Item1;
+            try
+            {
+                switch ((SnmpType)type)
+                {
+                    case SnmpType.Counter32:
+                        return new Counter32(Item1, Item2, stream);
+                    case SnmpType.Counter64:
+                        return new Counter64(Item1, Item2, stream);
+                    case SnmpType.Gauge32:
+                        return new Gauge32(Item1, Item2, stream);
+                    case SnmpType.ObjectIdentifier:
+                        return new ObjectIdentifier(Item1, Item2, stream);
+                    case SnmpType.Null:
+                        return new Null(Item1, Item2, stream);
+                    case SnmpType.NoSuchInstance:
+                        return new NoSuchInstance(Item1, Item2, stream);
+                    case SnmpType.NoSuchObject:
+                        return new NoSuchObject(Item1, Item2, stream);
+                    case SnmpType.EndOfMibView:
+                        return new EndOfMibView(Item1, Item2, stream);
+                    case SnmpType.Integer32:
+                        return new Integer32(Item1, Item2, stream);
+                    case SnmpType.OctetString:
+                        return new OctetString(Item1, Item2, stream);
+                    case SnmpType.IPAddress:
+                        return new IP(Item1, Item2, stream);
+                    case SnmpType.TimeTicks:
+                        return new TimeTicks(Item1, Item2, stream);
+                    case SnmpType.Sequence:
+                        return new Sequence(Item1, Item2, stream);
+                    case SnmpType.TrapV1Pdu:
+                        return new TrapV1Pdu(Item1, Item2, stream);
+                    case SnmpType.TrapV2Pdu:
+                        return new TrapV2Pdu(Item1, Item2, stream);
+                    case SnmpType.GetRequestPdu:
+                        return new GetRequestPdu(Item1, Item2, stream);
+                    case SnmpType.ResponsePdu:
+                        return new ResponsePdu(Item1, Item2, stream);
+                    case SnmpType.GetBulkRequestPdu:
+                        return new GetBulkRequestPdu(Item1, Item2, stream);
+                    case SnmpType.GetNextRequestPdu:
+                        return new GetNextRequestPdu(Item1, Item2, stream);
+                    case SnmpType.SetRequestPdu:
+                        return new SetRequestPdu(Item1, Item2, stream);
+                    case SnmpType.InformRequestPdu:
+                        return new InformRequestPdu(Item1, Item2, stream);
+                    case SnmpType.ReportPdu:
+                        return new ReportPdu(Item1, Item2, stream);
+                    case SnmpType.Opaque:
+                        return new Opaque(Item1, Item2, stream);
+                    case SnmpType.EndMarker:
+                        return null;
+                    case SnmpType.Unsigned32:
+                        // IMPORTANT: return Gauge32 for Unsigned32 case as workaround of RFC 1442 time entities.
+                        return new Gauge32(Item1, Item2, stream);
+                    default:
+                        throw new SnmpException(string.Format(CultureInfo.InvariantCulture, "unsupported data type: {0}", (SnmpType)type));
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is SnmpException)
+                {
+                    throw;
+                }
+
+                throw new SnmpException("data construction exception", ex);
+            }
+        }
+
+        /// <summary>
+        /// Creates an <see cref="ISnmpData"/> instance from buffer.
+        /// </summary>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="index">Index</param>
+        /// <param name="count">Count</param>
+        /// <returns></returns>
+        public static ISnmpData CreateSnmpData(byte[] buffer, int index, int count)
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            var m = new Span<byte>(buffer, index, count);
+            var next = 0;
+            return CreateSnmpData(m, 0, out next);
+        }
+#else 
         /// <summary>
         /// Creates an <see cref="ISnmpData"/> instance from stream.
         /// </summary>
@@ -64,7 +169,7 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(stream));
             }
-            
+
             var length = stream.ReadPayloadLength();
             try
             {
@@ -149,7 +254,7 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
-            
+
             using (var m = new MemoryStream(buffer, index, count, false))
             {
                 return CreateSnmpData(m);
@@ -170,5 +275,6 @@ namespace Lextm.SharpSnmpLib
 
             return CreateSnmpData(stream.ReadByte(), stream);
         }
+#endif
     }
 }

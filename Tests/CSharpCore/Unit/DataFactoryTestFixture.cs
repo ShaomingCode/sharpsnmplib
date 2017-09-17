@@ -19,10 +19,16 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
+#if NETCOREAPP2_0
+            var next = 0;
+            Assert.Throws<ArgumentNullException>(() => DataFactory.CreateSnmpData((Span<byte>)null, 0, out next));
+            Assert.Throws<ArgumentNullException>(() => DataFactory.CreateSnmpData(null, 0, out next));
+#else
             Assert.Throws<ArgumentNullException>(() => DataFactory.CreateSnmpData((Stream)null));
+            Assert.Throws<ArgumentNullException>(() => DataFactory.CreateSnmpData(0, null));
+#endif
             Assert.Throws<ArgumentNullException>(() => DataFactory.CreateSnmpData(null, 0, 0));
             Assert.Throws<ArgumentNullException>(() => DataFactory.CreateSnmpData((byte[])null));
-            Assert.Throws<ArgumentNullException>(() => DataFactory.CreateSnmpData(0, null));
         }
         
         [Fact]
@@ -134,9 +140,14 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestTrapv1Pdu()
         {
-            byte[] expected = new byte[] {0xA4, 0x37,
-                0x06, 0x0A, 0x2B, 0x06, 0x01, 0x04, 0x01, 0x90, 0x72, 0x87, 0x68, 0x02,
-                0x40, 0x04, 0x7F, 0x00, 0x00, 0x01,
+            byte[] expected = new byte[] {
+                // TrapV1Pdu
+                0xA4, 0x37, // length = 0x37
+                  // OBJECT IDENTIFIER
+                  0x06, 0x0A, // length = 0x0A
+                    0x2B, 0x06, 0x01, 0x04, 0x01, 0x90, 0x72, 0x87, 0x68, 0x02,
+                  // IP
+                  0x40, 0x04, 0x7F, 0x00, 0x00, 0x01,
                 0x02, 0x01, 0x06,
                 0x02, 0x01, 0x0C,
                 0x43, 0x02, 0x3F, 0xE0,
@@ -202,5 +213,5 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618
+#pragma warning restore 1591, 0618
 

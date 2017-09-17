@@ -22,12 +22,19 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
-            Assert.Throws<ArgumentNullException>(() => new Integer32(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
-            Assert.Throws<ArgumentException>(() => new Integer32(new Tuple<int, byte[]>(0, new byte[] { 0 }), new MemoryStream()));
-            Assert.Throws<ArgumentException>(() => new Integer32(new Tuple<int, byte[]>(-1, new[] { (byte)255 }), new MemoryStream()));
-            Assert.Throws<ArgumentException>(() => new Integer32(new Tuple<int, byte[]>(6, new byte[] { 6 }), new MemoryStream()));
+            Assert.Throws<ArgumentNullException>(() => new Integer32(0, new Span<byte>(new byte[] { 0 }), null));
             Assert.Throws<ArgumentNullException>(() => new Integer32(6).AppendBytesTo(null));
-            Assert.Throws<ArgumentNullException>(() => new Integer32(null, new MemoryStream()));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentException>(() => new Integer32(0, new Span<byte>(new byte[] { 0 }), new Span<byte>()));
+            Assert.Throws<ArgumentException>(() => new Integer32(-1, new Span<byte>(new[] { (byte)255 }), new Span<byte>()));
+            Assert.Throws<ArgumentException>(() => new Integer32(6, new Span<byte>(new byte[] { 6 }), new Span<byte>()));
+#else
+            var memoryStream = new MemoryStream();
+            Assert.Throws<ArgumentException>(() => new Integer32(new Tuple<int, byte[]>(0, new byte[] { 0 }), memoryStream));
+            Assert.Throws<ArgumentException>(() => new Integer32(new Tuple<int, byte[]>(-1, new[] { (byte)255 }), memoryStream));
+            Assert.Throws<ArgumentException>(() => new Integer32(new Tuple<int, byte[]>(6, new byte[] { 6 }), memoryStream));
+            Assert.Throws<ArgumentNullException>(() => new Integer32(null, memoryStream));
+#endif
         }
 
         [Fact]
@@ -66,7 +73,7 @@ namespace Lextm.SharpSnmpLib.Unit
             byte[] bytes = data.ToBytes();
             Assert.Equal(6, bytes.Length);
             var exception = Assert.Throws<SnmpException>(() => DataFactory.CreateSnmpData(new byte[] { 0x02, 0x05, 0xFF, 0xF1, 0xDE, 0xD9, 0x26 }));
-            Assert.Equal($"Truncation error for 32-bit integer coding.{Environment.NewLine}Parameter name: length", exception.InnerException.Message);
+            Assert.Equal($"Truncation error for 32-bit integer coding.{Environment.NewLine}Parameter name: Item1", exception.InnerException.Message);
         }
         
         [Fact]
@@ -125,4 +132,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618
+#pragma warning restore 1591, 0618

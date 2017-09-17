@@ -67,6 +67,29 @@ namespace Lextm.SharpSnmpLib
             _varbindSection = Variable.Transform(full);
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TrapV2Pdu"/> class.
+        /// </summary>
+        /// <param name="length">The length data.</param>
+        /// <param name="stream">The stream.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "temp2")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "temp1")]
+        public TrapV2Pdu(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            var next = 0;
+            RequestId = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            var status = DataFactory.CreateSnmpData(stream, next, out next);
+            var index = DataFactory.CreateSnmpData(stream, next, out next);
+            _varbindSection = (Sequence)DataFactory.CreateSnmpData(stream, next, out next);
+            Variables = Variable.Transform(_varbindSection); // v[0] is timestamp. v[1] oid, v[2] value.
+            _time = (TimeTicks)Variables[0].Data;
+            Variables.RemoveAt(0);
+            Enterprise = (ObjectIdentifier)Variables[0].Data;
+            Variables.RemoveAt(0);
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="TrapV2Pdu"/> class.
         /// </summary>
@@ -99,6 +122,7 @@ namespace Lextm.SharpSnmpLib
             Variables.RemoveAt(0);
             _length = length.Item2;
         }
+#endif
 
         #region ISnmpPdu Members
 

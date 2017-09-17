@@ -34,7 +34,12 @@ namespace Lextm.SharpSnmpLib
         /// Creates a <see cref="Gauge32"/> instance from raw bytes.
         /// </summary>
         /// <param name="raw"></param>
-        internal Gauge32(byte[] raw) : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+        internal Gauge32(byte[] raw)
+#if NETCOREAPP2_0
+            : this(raw.Length, raw.Length.WritePayloadLength(), new Span<byte>(raw))
+#else
+            : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+#endif
         {
             // IMPORTANT: for test project only.
         }
@@ -58,6 +63,17 @@ namespace Lextm.SharpSnmpLib
             _count = new Counter32(value);
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Gauge32"/> class.
+        /// </summary>
+        /// <param name="length">The length.</param>
+        /// <param name="stream">The stream.</param>
+        public Gauge32(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            _count = new Counter32(Item1, Item2, stream);
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="Gauge32"/> class.
         /// </summary>
@@ -77,6 +93,7 @@ namespace Lextm.SharpSnmpLib
             
             _count = new Counter32(length, stream);
         }
+#endif
 
         #region ISnmpData Members
         /// <summary>

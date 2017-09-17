@@ -91,6 +91,32 @@ namespace Lextm.SharpSnmpLib
             }
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Sequence"/> class.
+        /// </summary>
+        /// <param name="length">The length.</param>
+        /// <param name="stream">The stream.</param>
+        public Sequence(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            _length = Item2.ToArray();
+            if (Item1 == 0)
+            {
+                return;
+            }
+
+            int start = 0;
+            while (true)
+            {
+                var received = DataFactory.CreateSnmpData(stream, start, out start);
+                _list.Add(received);
+                if (start >= stream.Length)
+                {
+                    break;
+                }
+            }
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="Sequence"/> class.
         /// </summary>
@@ -120,6 +146,7 @@ namespace Lextm.SharpSnmpLib
                 _list.Add(DataFactory.CreateSnmpData(stream));
             }
         }
+#endif
 
         /// <summary>
         /// Item count in this <see cref="Sequence"/>.

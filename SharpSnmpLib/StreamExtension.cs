@@ -28,6 +28,37 @@ namespace Lextm.SharpSnmpLib
     /// </summary>
     public static class StreamExtension
     {
+#if NETCOREAPP2_0
+        internal static Span<byte> ReadPayloadLength(this Span<byte> stream, out int length)
+        {
+            var list = new List<byte>();
+            var firstByte = stream[0];
+            if ((firstByte & 0x80) == 0)
+            {
+                length = firstByte;
+                return stream.Slice(0, 1);
+            }
+
+            list.Add(firstByte);
+            var result = 0;
+            var octets = firstByte & 0x7f;
+            for (var j = 0; j < octets; j++)
+            {
+                var index = j + 1;
+                if (index == stream.Length)
+                {
+                    throw new SnmpException("BER end of file");
+                }
+
+                var nextByte = stream[j + 1];
+                result = (result << 8) + nextByte;
+                list.Add(nextByte);
+            }
+
+            length = result;
+            return stream.Slice(0, octets);
+        }
+#else
         internal static Tuple<int, byte[]> ReadPayloadLength(this Stream stream)
         {
             if (stream == null)
@@ -62,6 +93,8 @@ namespace Lextm.SharpSnmpLib
             
             return new Tuple<int, byte[]>(result, list.ToArray());
         }
+
+#endif
 
         internal static void IgnoreBytes(this Stream stream, int length)
         {

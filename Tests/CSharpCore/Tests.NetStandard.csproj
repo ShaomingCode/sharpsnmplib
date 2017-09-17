@@ -9,7 +9,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.resx" />
@@ -29,6 +29,7 @@
     <None Include="sharpsnmplib.tests.snk" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
     <PackageReference Include="System.AppDomain" Version="2.0.11" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Linq.Parallel" Version="4.3.0" />
@@ -38,12 +39,11 @@
     <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
-    <PackageReference Include="xunit" Version="2.2.0">
-    </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0">
-    </PackageReference>
+    <PackageReference Include="xunit" Version="2.3.0-beta5-build3769" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta4-build3742" />
     <PackageReference Include="Moq" Version="4.7.99" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-beta5-build3769" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\SharpSnmpLib\SharpSnmpLib.csproj" />

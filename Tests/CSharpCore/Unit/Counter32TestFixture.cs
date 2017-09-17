@@ -11,7 +11,9 @@ namespace Lextm.SharpSnmpLib.Unit
         public void TestException()
         {
             Assert.Throws<ArgumentNullException>(()=> new Counter32(0).AppendBytesTo(null));
+#if !NETCOREAPP2_0
             Assert.Throws<ArgumentNullException>(()=> new Counter32(null, new MemoryStream()));
+#endif
         }
 
         [Fact]
@@ -78,19 +80,14 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestContructor3()
         {
-            Assert.Throws<ArgumentNullException>(() => new Counter32(new Tuple<int, byte[]>(1, new byte[] { 1 }), null));
-        }
-        
-        [Fact]
-        public void TestConstructor4()
-        {
+            Assert.Throws<ArgumentNullException>(() => new Counter32(1, new Span<byte>(new byte[] { 1 }), null));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentException>(() => new Counter32(0, new Span<byte>(new byte[] { 0 }), new Span<byte>()));
+            Assert.Throws<ArgumentException>(() => new Counter32(6, new Span<byte>(new byte[] { 6 }), new Span<byte>()));
+#else
             Assert.Throws<ArgumentException>(() => new Counter32(new Tuple<int, byte[]>(0, new byte[] { 0 }), new MemoryStream()));
-        }
-        
-        [Fact]
-        public void TestConstructor5()
-        {
             Assert.Throws<ArgumentException>(() => new Counter32(new Tuple<int, byte[]>(6, new byte[] { 6 }), new MemoryStream()));
+#endif
         }
         
         [Fact]
@@ -134,4 +131,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618, 1718
+#pragma warning restore 1591, 0618, 1718

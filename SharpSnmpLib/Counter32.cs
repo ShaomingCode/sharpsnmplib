@@ -37,7 +37,12 @@ namespace Lextm.SharpSnmpLib
         /// Creates a <see cref="Counter32"/> instance from raw bytes.
         /// </summary>
         /// <param name="raw"></param>
-        internal Counter32(byte[] raw) : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+        internal Counter32(byte[] raw)
+#if NETCOREAPP2_0
+            : this(raw.Length, raw.Length.WritePayloadLength(), new Span<byte>(raw))
+#else
+            : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+#endif
         {
             // IMPORTANT: for test project only.
         }
@@ -61,6 +66,43 @@ namespace Lextm.SharpSnmpLib
             _count = (uint)value;
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Creates a <see cref="Counter32"/> instance from stream.
+        /// </summary>
+        /// <param name="length">The length.</param>
+        /// <param name="stream">The stream.</param>
+        public Counter32(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            if (Item1 < 1 || Item1 > 5)
+            {
+                throw new ArgumentException("Byte length must between 1 and 5.", nameof(Item1));
+            }
+
+            _raw = stream.ToArray();
+
+            // TODO: improve here to read from stream directly.
+            if (Item1 == 5 && _raw[0] != 0)
+            {
+                throw new ArgumentException("If byte length is 5, then first byte must be 0.", nameof(Item1));
+            }
+
+            var list = new List<byte>(_raw);
+            list.Reverse();
+            while (list.Count > 4)
+            {
+                list.RemoveAt(list.Count - 1);
+            }
+
+            while (list.Count < 4)
+            {
+                list.Add(0);
+            }
+
+            _count = BitConverter.ToUInt32(list.ToArray(), 0);
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Creates a <see cref="Counter32"/> instance from stream.
         /// </summary>
@@ -107,8 +149,9 @@ namespace Lextm.SharpSnmpLib
             _count = BitConverter.ToUInt32(list.ToArray(), 0);
             _length = length.Item2;
         }
+#endif
 
-        #region ISnmpData Members
+#region ISnmpData Members
         /// <summary>
         /// Type code.
         /// </summary>
@@ -131,7 +174,7 @@ namespace Lextm.SharpSnmpLib
             stream.AppendBytes(TypeCode, _length, GetRaw());
         }
 
-        #endregion
+#endregion
         /// <summary>
         /// Returns a <see cref="UInt32"/> that represents a <see cref="Counter32"/>.
         /// </summary>

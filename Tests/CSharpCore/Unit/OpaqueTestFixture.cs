@@ -19,8 +19,12 @@ namespace Lextm.SharpSnmpLib.Unit
         public void TestException()
         {
             Assert.Throws<NullReferenceException>(()=>new Opaque(null));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new Opaque(1, new Span<byte>(new byte[0]), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new Opaque(null, null));
             Assert.Throws<ArgumentNullException>(() => new Opaque(new Tuple<int, byte[]>(1, new byte[0]), null));
+#endif
         }
 
         [Fact]
@@ -55,4 +59,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618
+#pragma warning restore 1591, 0618

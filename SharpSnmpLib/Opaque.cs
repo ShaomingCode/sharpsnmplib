@@ -48,6 +48,26 @@ namespace Lextm.SharpSnmpLib
         private readonly byte[] _raw;
         private readonly byte[] _length;
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Creates an <see cref="Opaque"/> from raw bytes.
+        /// </summary>
+        /// <param name="raw">Raw bytes</param>
+        internal Opaque(byte[] raw) : this(raw.Length, raw.Length.WritePayloadLength(), new Span<byte>(raw))
+        {
+        }
+    
+        /// <summary>
+        /// Creates a <see cref="Opaque"/> instance from stream.
+        /// </summary>
+        /// <param name="length">The length.</param>
+        /// <param name="stream">The stream.</param>
+        public Opaque(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            _raw = stream.ToArray();
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Creates an <see cref="Opaque"/> from raw bytes.
         /// </summary>
@@ -55,7 +75,7 @@ namespace Lextm.SharpSnmpLib
         internal Opaque(byte[] raw) : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
         {
         }
-
+        
         /// <summary>
         /// Creates a <see cref="Opaque"/> instance from stream.
         /// </summary>
@@ -77,7 +97,8 @@ namespace Lextm.SharpSnmpLib
             stream.Read(_raw, 0, length.Item1);
             _length = length.Item2;
         }
-        
+#endif
+
         /// <summary>
         /// Returns a <see cref="String"/> that represents this <see cref="Opaque"/>.
         /// </summary>
@@ -108,7 +129,7 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(stream));
             }
-            
+
             stream.AppendBytes(TypeCode, _length, GetRaw());
         }
 
@@ -131,7 +152,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(this, other);
         }
-        
+
         /// <summary>
         /// Determines whether the specified <see cref="Object"/> is equal to the current <see cref="Opaque"/>.
         /// </summary>
@@ -142,7 +163,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(this, obj as Opaque);
         }
-        
+
         /// <summary>
         /// Serves as a hash function for a particular type.
         /// </summary>
@@ -151,7 +172,7 @@ namespace Lextm.SharpSnmpLib
         {
             return ToString().GetHashCode();
         }
-        
+
         /// <summary>
         /// The equality operator.
         /// </summary>
@@ -163,7 +184,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(left, right);
         }
-        
+
         /// <summary>
         /// The inequality operator.
         /// </summary>
@@ -175,7 +196,7 @@ namespace Lextm.SharpSnmpLib
         {
             return !(left == right);
         }
-        
+
         /// <summary>
         /// The comparison.
         /// </summary>
@@ -197,9 +218,9 @@ namespace Lextm.SharpSnmpLib
                 return false;
             }
 
-            return left._raw.SequenceEqual(right._raw); 
+            return left._raw.SequenceEqual(right._raw);
         }
     }
-    
+
     // all references here are to ITU-X.690-12/97
 }

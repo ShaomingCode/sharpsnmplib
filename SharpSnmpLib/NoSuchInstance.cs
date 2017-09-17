@@ -37,6 +37,17 @@ namespace Lextm.SharpSnmpLib
     {
         private readonly byte[] _length;
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NoSuchInstance"/> class.
+        /// </summary>
+        /// <param name="length">The length data.</param>
+        /// <param name="stream">The stream.</param>
+        public NoSuchInstance(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="NoSuchInstance"/> class.
         /// </summary>
@@ -57,6 +68,7 @@ namespace Lextm.SharpSnmpLib
             stream.IgnoreBytes(length.Item1);
             _length = length.Item2;
         }
+#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NoSuchInstance"/> class.

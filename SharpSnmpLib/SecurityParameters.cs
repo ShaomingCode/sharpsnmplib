@@ -114,8 +114,14 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
-            
+
+
+#if NETCOREAPP2_0
+            var next = 0;
+            var container = (Sequence)DataFactory.CreateSnmpData(parameters.GetSpan(), 0, out next);
+#else
             var container = (Sequence)DataFactory.CreateSnmpData(parameters.GetRaw());
+#endif
             EngineId = (OctetString)container[0];
             EngineBoots = (Integer32)container[1];
             EngineTime = (Integer32)container[2];
@@ -169,7 +175,7 @@ namespace Lextm.SharpSnmpLib
             return new Sequence(_length, EngineId, EngineBoots, EngineTime, UserName, AuthenticationParameters, PrivacyParameters);
         }
 
-        #region ISegment Members
+#region ISegment Members
 
         /// <summary>
         /// Gets the data.
@@ -181,7 +187,7 @@ namespace Lextm.SharpSnmpLib
             return version == VersionCode.V3 ? new OctetString(ToSequence().ToBytes()) : UserName;
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.

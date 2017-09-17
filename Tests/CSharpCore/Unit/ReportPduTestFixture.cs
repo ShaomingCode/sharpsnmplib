@@ -10,7 +10,11 @@ namespace Lextm.SharpSnmpLib.Unit
         public void TestException()
         {
             Assert.Throws<ArgumentNullException>(() => new ReportPdu(0, ErrorCode.NoError, 0, null));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new ReportPdu(0, new Span<byte>(new byte[] { 0 }), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new ReportPdu(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+#endif
             var pdu = new ReportPdu(0, ErrorCode.NoError, 0, new List<Variable>());
             Assert.Throws<ArgumentNullException>(() => pdu.AppendBytesTo(null));
             Assert.Equal("REPORT PDU: seq: 0; status: 0; index: 0; variable count: 0", pdu.ToString());

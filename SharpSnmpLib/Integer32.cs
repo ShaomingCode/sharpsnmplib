@@ -60,7 +60,12 @@ namespace Lextm.SharpSnmpLib
         /// Creates an <see cref="Integer32"/> instance.
         /// </summary>
         /// <param name="raw">Raw bytes</param>
-        internal Integer32(byte[] raw) : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+        internal Integer32(byte[] raw)
+#if NETCOREAPP2_0
+            : this(raw.Length, raw.Length.WritePayloadLength(), new Span<byte>(raw))
+#else
+            : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+#endif
         {
             // IMPORTANT: for test project only.
         }
@@ -73,6 +78,35 @@ namespace Lextm.SharpSnmpLib
         {
             _int = value;
         }
+
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Integer32"/> class.
+        /// </summary>
+        /// <param name="length">The length.</param>
+        /// <param name="stream">The stream.</param>
+        public Integer32(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            if (Item1 <= 0)
+            {
+                throw new ArgumentException("Byte length cannot be 0.", nameof(Item1));
+            }
+
+            if (Item1 > 4)
+            {
+                throw new ArgumentException("Truncation error for 32-bit integer coding.", nameof(Item1));
+            }
+
+            _raw = stream.ToArray();
+            _int = ((_raw[0] & 0x80) == 0x80) ? -1 : 0; // sign extended! Guy McIlroy
+            for (var j = 0; j < Item1; j++)
+            {
+                _int = (_int << 8) | _raw[j];
+            }
+
+            _length = Item2.ToArray();
+        }
+#else
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Integer32"/> class.
@@ -111,6 +145,7 @@ namespace Lextm.SharpSnmpLib
 
             _length = length.Item2;
         }
+#endif
 
         /// <summary>
         /// Returns an <see cref="Int32"/> that represents this <see cref="Integer32"/>.

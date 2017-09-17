@@ -61,6 +61,23 @@ namespace Lextm.SharpSnmpLib
             _varbindSection = Variable.Transform(variables);
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetNextRequestPdu"/> class.
+        /// </summary>
+        /// <param name="length">The length data.</param>
+        /// <param name="stream">The stream.</param>
+        public GetNextRequestPdu(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            var next = 0;
+            RequestId = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            ErrorStatus = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            ErrorIndex = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            _varbindSection = (Sequence)DataFactory.CreateSnmpData(stream, next, out next);
+            Variables = Variable.Transform(_varbindSection);
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="GetNextRequestPdu"/> class.
         /// </summary>
@@ -85,6 +102,7 @@ namespace Lextm.SharpSnmpLib
             Variables = Variable.Transform(_varbindSection);
             _length = length.Item2;
         }
+#endif
 
         /// <summary>
         /// Gets the request ID.

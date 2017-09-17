@@ -38,11 +38,16 @@ namespace Lextm.SharpSnmpLib
         /// Creates a <see cref="Counter64"/> instance from raw bytes.
         /// </summary>
         /// <param name="raw"></param>
-        internal Counter64(byte[] raw) : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+        internal Counter64(byte[] raw)
+#if NETCOREAPP2_0
+            : this(raw.Length, raw.Length.WritePayloadLength(), new Span<byte>(raw))
+#else
+            : this(new Tuple<int, byte[]>(raw.Length, raw.Length.WritePayloadLength()), new MemoryStream(raw))
+#endif
         {
             // IMPORTANT: for test project only.
         }
-        
+
         /// <summary>
         /// Creates a <see cref="Counter64"/> with a specific <see cref="UInt64"/>.
         /// </summary>
@@ -53,6 +58,41 @@ namespace Lextm.SharpSnmpLib
             _count = value;
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Counter64"/> class.
+        /// </summary>
+        /// <param name="length">The length.</param>
+        /// <param name="stream">The stream.</param>
+        public Counter64(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            if (Item1 <= 0 || Item1 > 9)
+            {
+                throw new ArgumentException("Byte length must between 1 and 9.", nameof(Item1));
+            }
+
+            _raw = stream.ToArray();
+            if (Item1 == 9 && _raw[0] != 0)
+            {
+                throw new ArgumentException("If byte length is 5, then first byte must be empty.", nameof(Item1));
+            }
+
+            var list = new List<byte>(_raw);
+            list.Reverse();
+            while (list.Count > 8)
+            {
+                list.RemoveAt(list.Count - 1);
+            }
+
+            while (list.Count < 8)
+            {
+                list.Add(0);
+            }
+
+            _count = BitConverter.ToUInt64(list.ToArray(), 0);
+            _length = Item2.ToArray();
+        }
+#else        
         /// <summary>
         /// Initializes a new instance of the <see cref="Counter64"/> class.
         /// </summary>
@@ -97,6 +137,7 @@ namespace Lextm.SharpSnmpLib
             _count = BitConverter.ToUInt64(list.ToArray(), 0);
             _length = length.Item2;
         }
+#endif
 
         #region ISnmpData Members
         /// <summary>
@@ -106,7 +147,7 @@ namespace Lextm.SharpSnmpLib
         {
             get { return SnmpType.Counter64; }
         }
-        
+
         /// <summary>
         /// Appends the bytes to <see cref="Stream"/>.
         /// </summary>
@@ -117,11 +158,11 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(stream));
             }
-            
+
             stream.AppendBytes(TypeCode, _length, GetRaw());
         }
+#endregion
 
-        #endregion
         /// <summary>
         /// Returns a <see cref="UInt64"/> that represents a <see cref="Counter64"/>.
         /// </summary>
@@ -131,7 +172,7 @@ namespace Lextm.SharpSnmpLib
         {
             return _count;
         }
-        
+
         /// <summary>
         /// Returns a <see cref="String"/> that represents this <see cref="Counter64"/>.
         /// </summary>
@@ -160,7 +201,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(this, other);
         }
-        
+
         /// <summary>
         /// Determines whether the specified <see cref="Object"/> is equal to the current <see cref="Counter64"/>.
         /// </summary>
@@ -171,7 +212,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(this, obj as Counter64);
         }
-        
+
         /// <summary>
         /// Serves as a hash function for a particular type.
         /// </summary>
@@ -180,7 +221,7 @@ namespace Lextm.SharpSnmpLib
         {
             return ToUInt64().GetHashCode();
         }
-        
+
         /// <summary>
         /// The equality operator.
         /// </summary>
@@ -192,7 +233,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(left, right);
         }
-        
+
         /// <summary>
         /// The inequality operator.
         /// </summary>
@@ -204,7 +245,7 @@ namespace Lextm.SharpSnmpLib
         {
             return !(left == right);
         }
-        
+
         /// <summary>
         /// The comparison.
         /// </summary>
@@ -225,7 +266,7 @@ namespace Lextm.SharpSnmpLib
             {
                 return false;
             }
-            
+
             return left.ToUInt64() == right.ToUInt64();
         }
     }

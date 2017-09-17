@@ -22,11 +22,17 @@ namespace Lextm.SharpSnmpLib.Unit
         {
             var test = new IP(IPAddress.Any.GetAddressBytes());
             Assert.Throws<ArgumentNullException>(() => test.AppendBytesTo(null));
-            Assert.Throws<ArgumentNullException>(() => new IP(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
-            Assert.Throws<ArgumentNullException>(() => new IP((byte[]) null));
-            Assert.Throws<ArgumentException>(() => new IP(new Tuple<int, byte[]>(1, new byte[] { 1 }), new MemoryStream()));
+            Assert.Throws<ArgumentNullException>(() => new IP((byte[])null));
             Assert.Throws<FormatException>(() => new IP("test"));
-            Assert.Throws<ArgumentNullException>(() => new IP(null, new MemoryStream()));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new IP(0, new Span<byte>(new byte[] { 0 }), null));
+            Assert.Throws<ArgumentException>(() => new IP(1, new Span<byte>(new byte[] { 1 }), new Span<byte>()));
+#else
+            Assert.Throws<ArgumentNullException>(() => new IP(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+            var memoryStream = new MemoryStream();
+            Assert.Throws<ArgumentException>(() => new IP(new Tuple<int, byte[]>(1, new byte[] { 1 }), memoryStream));
+            Assert.Throws<ArgumentNullException>(() => new IP(null, memoryStream));
+#endif
         }
 
         [Fact]
@@ -37,14 +43,14 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Equal(expected, ip.ToString());
             var test = new IP(IPAddress.Any.GetAddressBytes());
         }
-        
+
         [Fact]
         public void TestToBytes()
         {
             IP ip = new IP("129.213.224.111");
-            Assert.Equal(new byte[] {0x40, 0x04, 0x81, 0xD5, 0xE0, 0x6F}, ip.ToBytes());
+            Assert.Equal(new byte[] { 0x40, 0x04, 0x81, 0xD5, 0xE0, 0x6F }, ip.ToBytes());
         }
-        
+
         [Fact]
         public void TestEquals()
         {
@@ -54,9 +60,9 @@ namespace Lextm.SharpSnmpLib.Unit
 
             Assert.True(actual.Equals(target));
             Assert.True(actual == target);
-// ReSharper disable EqualExpressionComparison
+            // ReSharper disable EqualExpressionComparison
             Assert.True(actual == actual);
-// ReSharper restore EqualExpressionComparison
+            // ReSharper restore EqualExpressionComparison
             Assert.Equal(actual, target);
             Assert.False(actual == another);
             Assert.True(actual != another);
@@ -66,4 +72,4 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618,1718
+#pragma warning restore 1591, 0618, 1718

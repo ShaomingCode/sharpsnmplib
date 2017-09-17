@@ -110,6 +110,25 @@ namespace Lextm.SharpSnmpLib
             Variables = variables;
         }
 
+#if NETCOREAPP2_0
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TrapV1Pdu"/> class.
+        /// </summary>
+        /// <param name="length">The length data.</param>
+        /// <param name="stream">The stream.</param>
+        public TrapV1Pdu(int Item1, Span<byte> Item2, Span<byte> stream)
+        {
+            var next = 0;
+            Enterprise = (ObjectIdentifier)DataFactory.CreateSnmpData(stream, next, out next);
+            AgentAddress = (IP)DataFactory.CreateSnmpData(stream, next, out next);
+            _generic = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            _specific = (Integer32)DataFactory.CreateSnmpData(stream, next, out next);
+            TimeStamp = (TimeTicks)DataFactory.CreateSnmpData(stream, next, out next);
+            _varbindSection = (Sequence)DataFactory.CreateSnmpData(stream, next, out next);
+            Variables = Variable.Transform(_varbindSection);
+            _length = Item2.ToArray();
+        }
+#else
         /// <summary>
         /// Initializes a new instance of the <see cref="TrapV1Pdu"/> class.
         /// </summary>
@@ -136,6 +155,7 @@ namespace Lextm.SharpSnmpLib
             Variables = Variable.Transform(_varbindSection);
             _length = length.Item2;
         }
+#endif
 
         /// <summary>
         /// Gets the request ID.

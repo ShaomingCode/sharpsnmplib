@@ -18,7 +18,11 @@ namespace Lextm.SharpSnmpLib.Unit
         [Fact]
         public void TestException()
         {
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new GetBulkRequestPdu(0, new Span<byte>(new byte[] { 0 }), null));
+#else
             Assert.Throws<ArgumentNullException>(() => new GetBulkRequestPdu(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
+#endif
             Assert.Throws<ArgumentNullException>(() => new GetBulkRequestPdu(0, 0, 0, null));
             
             var pdu = new GetBulkRequestPdu(0, 0, 0, new List<Variable>());

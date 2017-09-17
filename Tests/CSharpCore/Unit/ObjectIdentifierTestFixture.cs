@@ -14,9 +14,14 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Throws<ArgumentException>(() => new ObjectIdentifier(new uint[] {1}));
             Assert.Throws<ArgumentException>(() => new ObjectIdentifier(new uint[] {5, 8}));
             Assert.Throws<ArgumentException>(() => new ObjectIdentifier(new uint[] {1, 80}));
+#if NETCOREAPP2_0
+            Assert.Throws<ArgumentNullException>(() => new ObjectIdentifier(0, new Span<byte>(new byte[] { 0 }), null));
+            Assert.Throws<ArgumentException>(() => new ObjectIdentifier(0, new Span<byte>(new byte[] { 0 }), new Span<byte>()));
+#else
             Assert.Throws<ArgumentNullException>(() => new ObjectIdentifier(new Tuple<int, byte[]>(0, new byte[] { 0 }), null));
             Assert.Throws<ArgumentException>(() => new ObjectIdentifier(new Tuple<int, byte[]>(0, new byte[] { 0 }), new MemoryStream()));
-// ReSharper disable RedundantCast
+#endif
+            // ReSharper disable RedundantCast
             Assert.Throws<ArgumentNullException>(() => new ObjectIdentifier(new uint[] {1, 3}).CompareTo((ObjectIdentifier)null));
 // ReSharper restore RedundantCast
             Assert.Throws<ArgumentNullException>(() => ObjectIdentifier.Convert((uint[])null));
@@ -113,5 +118,5 @@ namespace Lextm.SharpSnmpLib.Unit
         }
     }
 }
-#pragma warning restore 1591,0618
+#pragma warning restore 1591, 0618
 
