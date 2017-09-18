@@ -54,7 +54,7 @@ namespace Lextm.SharpSnmpLib.Unit
             var Item1 = 0;
             var Item2 = m.ReadPayloadLength(out Item1);
             Assert.Equal(102, Item1);
-            Assert.Equal(new byte[] { 0x66 }, Item2);
+            Assert.Equal(new byte[] { 0x66 }, Item2.ToArray());
         }
 #else
         [Fact]
