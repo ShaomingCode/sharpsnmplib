@@ -31,7 +31,6 @@ namespace Lextm.SharpSnmpLib
 #if NETCOREAPP2_0
         internal static Span<byte> ReadPayloadLength(this Span<byte> stream, out int length)
         {
-            var list = new List<byte>();
             var firstByte = stream[0];
             if ((firstByte & 0x80) == 0)
             {
@@ -39,7 +38,6 @@ namespace Lextm.SharpSnmpLib
                 return stream.Slice(0, 1);
             }
 
-            list.Add(firstByte);
             var result = 0;
             var octets = firstByte & 0x7f;
             for (var j = 0; j < octets; j++)
@@ -52,11 +50,10 @@ namespace Lextm.SharpSnmpLib
 
                 var nextByte = stream[j + 1];
                 result = (result << 8) + nextByte;
-                list.Add(nextByte);
             }
 
             length = result;
-            return stream.Slice(0, octets);
+            return stream.Slice(0, octets + 1);
         }
 #else
         internal static Tuple<int, byte[]> ReadPayloadLength(this Stream stream)

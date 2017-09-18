@@ -109,7 +109,7 @@ namespace Lextm.SharpSnmpLib.Messaging
             {
                 var message = ParseMessage(stream, registry, start, out start);
                 result.Add(message);
-                if (start >= stream.Length)
+                if (start >= length)
                 {
                     break;
                 }

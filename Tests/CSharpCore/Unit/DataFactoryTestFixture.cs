@@ -211,6 +211,14 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Null(newPdu.Enterprise);
             Assert.Equal(0U, newPdu.TimeStamp);
         }
+
+        [Fact]
+        public void TestResponseV3()
+        {
+            var bytes = "30 81 92 02 01 03 30 11 02 04 02 6A D4 60 02 03 00 FF E3 04 01 01 02 01 03 04 2E 30 2C 04 0C 80 00 1F 88 80 E9 63 00 00 D6 1F F4 02 01 00 02 01 01 04 06 61 75 74 68 65 6E 04 0C EF A5 A3 CE FA 91 A0 21 B1 CE 2E DD 04 00 30 4A 04 0C 80 00 1F 88 80 E9 63 00 00 D6 1F F4 04 00 A2 38 02 04 2C 27 4E 37 02 01 00 02 01 00 30 2A 30 28 06 08 2B 06 01 02 01 01 01 00 04 1C 23 53 4E 4D 50 20 41 67 65 6E 74 20 6F 6E 20 2E 4E 45 54 20 53 74 61 6E 64 61 72 64";
+            var buffer = ByteTool.Convert(bytes);
+            DataFactory.CreateSnmpData(buffer);
+        }
     }
 }
 #pragma warning restore 1591, 0618
