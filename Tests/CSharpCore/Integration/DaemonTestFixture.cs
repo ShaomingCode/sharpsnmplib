@@ -176,7 +176,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 IAuthenticationProvider auth = new MD5AuthenticationProvider(new OctetString("authenticationauthentication"));
                 IPrivacyProvider priv = new DefaultPrivacyProvider(auth);
 
-                var timeout = 1500;
+                var timeout = 15000;
                 Discovery discovery = Messenger.GetNextDiscovery(SnmpType.GetRequestPdu);
                 ReportMessage report = discovery.GetResponse(timeout, serverEndPoint);
 
@@ -544,7 +544,7 @@ namespace Lextm.SharpSnmpLib.Integration
 
                 Assert.True(message.ToBytes().Length > 10000);
 
-                var time = 1500;
+                var time = 15000;
                 if (SnmpMessageExtension.IsRunningOnMac)
                 {
                     var exception =
